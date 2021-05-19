@@ -1,9 +1,15 @@
 import argparse
 
-from torch.utils.data import DataLoader
+import numpy as np
+import pytorch_lightning as pl
 
+import cv2
+import matplotlib.pyplot as plt
+
+from data_handle.data_module import BWDataModule
 from data_handle.data_splitter import split_data_2_train_val_test
-from data_handle.dataset import BWDataset
+from models.unet import Unet
+from utils.cuda import cuda
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='This app is used for BW-Colorize task')
@@ -14,6 +20,23 @@ if __name__ == '__main__':
     if args.action == 'split':
         split_data_2_train_val_test()
 
-    batch_size = 64
-    train_dataset = BWDataset(x_dir='dataset/l/gray_scale.npy', y_dir='dataset/ab/ab1.npy')
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    elif args.action == 'train':
+        train_path = 'dataset/train'
+        val_path = 'dataset/val'
+        data = BWDataModule(train_dir=train_path, val_dir=val_path)
+
+        model = Unet(in_c=1, out_c=2)
+        trainer = pl.Trainer(gpus=1)
+        trainer.fit(model, data)
+
+    elif args.action == 'eval':
+        x = np.load('dataset/train/x.npy')
+        y = np.load('dataset/train/y.npy')
+
+        img = x[0]
+        img = np.expand_dims(img, 2)
+        ab = y[0]
+
+        img = np.dstack((img, ab))
+        rgb_sample = cv2.cvtColor(img, cv2.COLOR_LAB2RGB)
+        print(1)

@@ -1,6 +1,6 @@
+import torch
 from torch.utils.data import Dataset
 import numpy as np
-import cv2 as cv
 
 
 class BWDataset(Dataset):
@@ -13,14 +13,12 @@ class BWDataset(Dataset):
         l_image = self.x[index]
         ab_image = self.y[index]
 
-        l_image = cv.resize(l_image, (192, 192), interpolation=cv.INTER_AREA)
-        ab_image = cv.resize(ab_image, (192, 192), interpolation=cv.INTER_AREA)
+        l_image = np.expand_dims(l_image, 2)
 
         if self.transforms:
             l_image = self.transforms(l_image)
-            ab_image = self.transforms(ab_image)
 
-        return l_image, ab_image
+        return l_image, torch.Tensor(ab_image)
 
     def __len__(self):
         return len(self.x)

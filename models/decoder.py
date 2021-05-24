@@ -1,5 +1,4 @@
 import pytorch_lightning as pl
-from torch import nn
 
 from models.blocks import Conv, DeConv
 
@@ -7,48 +6,37 @@ from models.blocks import Conv, DeConv
 class Decoder(pl.LightningModule):
     def __init__(self, out_c):
         super(Decoder, self).__init__()
-        self.up6 = DeConv(256, 256)
-        self.up6conv = Conv(512, 256)
+        self.m = Conv(512, 512)
 
-        self.up5 = DeConv(256, 256)
-        self.up5conv = Conv(512, 256)
-
-        self.up4 = DeConv(256, 256)
-        self.up4conv = Conv(512, 256)
-
-        self.up3 = DeConv(256, 128)
-        self.up3conv = Conv(256, 128)
-
-        self.up2 = DeConv(128, 64)
-        self.up2conv = Conv(128, 64)
-
-        self.up1 = DeConv(64, 32)
-        self.up1conv = Conv(64, 32)
-
-        self.last_conv = nn.Conv2d(32, out_c, kernel_size=(1, 1))
-        self.act_out = nn.Tanh()
+        self.deconv6 = DeConv(1024, 512, padding=0, output_padding=0)
+        self.deconv5 = DeConv(1024, 256)
+        self.deconv4 = DeConv(512, 128)
+        self.deconv3 = DeConv(256, 64)
+        self.deconv2 = DeConv(128, 32)
+        self.deconv1 = DeConv(64, out_c)
 
     def forward(self, z):
-        down1, down2, down3, down4, down5, down6 = z
-        up6 = self.up6(down6, down6)  # up6 = (1024x6x6)
-        up6conv = self.up6conv(up6)  # up6conv = (1024x6x6)
+        skip_x1, skip_x2, skip_x3, skip_x4, skip_x5, skip_x6, m = z
 
-        up5 = self.up5(up6conv, down5)  # up5 = (1024x12x12)
-        up5conv = self.up5conv(up5)  # up6conv = (512x12x12)
+        # layer 1  (b, 512, 3, 3) ->  (b, 512, 3, 3)
+        m = self.m(m)
 
-        up4 = self.up4(up5conv, down4)  # up4 = (512x24x24)
-        up4conv = self.up4conv(up4)  # up4conv = (256x24x24)
+        # layer 2  (b, 512, 3, 3), (512, 7, 7) ->  (b, 512, 7, 7)
+        x6 = self.deconv6(m, skip_x6)
 
-        up3 = self.up3(up4conv, down3)  # up3 = (256x48x48)
-        up3conv = self.up3conv(up3)  # up3conv = (128x48x48)
+        # layer 3  (b, 512, 7, 7), (b, 512, 14, 14) ->  (b, 256, 14, 14)
+        x5 = self.deconv5(x6, skip_x5)
 
-        up2 = self.up2(up3conv, down2)  # up2 = (128x96x96)
-        up2conv = self.up2conv(up2)  # up2conv = (64x96x96)
+        # layer 4  (b, 256, 14, 14), (b, 256, 28, 28) ->  (b, 128, 28, 28)
+        x4 = self.deconv4(x5, skip_x4)
 
-        up1 = self.up1(up2conv, down1)  # up1 = (64x192x192)
-        up1conv = self.up1conv(up1)  # up1conv = (32x192x192)
+        # layer 5  (b, 128, 28, 28), (b, 128, 56, 56) ->  (b, 64, 56, 56)
+        x3 = self.deconv3(x4, skip_x3)
 
-        pre_act = self.last_conv(up1conv)  # (2x192x192)
-        out = self.act_out(pre_act)
+        # layer 6  (b, 64, 56, 56), (b, 64, 112, 112) ->  (b, 32, 112, 112)
+        x2 = self.deconv2(x3, skip_x2)
 
-        return down1, down2, down3, down4, down5, down6
+        # layer 7  (b, 32, 112, 112), (b, 32, 224, 224) ->  (b, 2, 224, 224)
+        x1 = self.deconv1(x2, skip_x1)
+
+        return x1

@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 from data_handle.data_module import BWDataModule
 from data_handle.data_splitter import split_data_2_train_val_test
 from models.unet import Unet
-from utils.cuda import cuda
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='This app is used for BW-Colorize task')

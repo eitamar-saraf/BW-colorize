@@ -18,7 +18,10 @@ class BWDataset(Dataset):
         if self.transforms:
             l_image = self.transforms(l_image)
 
-        return l_image, torch.Tensor(ab_image)
+        ab_image = ab_image.transpose((2, 0, 1))
+        ab_image = torch.Tensor(ab_image)
+
+        return l_image, ab_image
 
     def __len__(self):
         return len(self.x)

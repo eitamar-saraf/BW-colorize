@@ -1,4 +1,5 @@
 import pytorch_lightning as pl
+import torch
 from torch import nn
 
 
@@ -14,7 +15,6 @@ class Conv(pl.LightningModule):
                       padding=(padding, padding), bias=bias),
             nn.BatchNorm2d(output_c),
             nn.LeakyReLU(0.2),
-            nn.MaxPool2d(2)
         )
 
     def forward(self, x):
@@ -25,13 +25,13 @@ class Conv(pl.LightningModule):
 class DeConv(pl.LightningModule):
     def __init__(self, input_c, output_c, kernel=3, stride=2, padding=1, output_padding=1):
         super().__init__()
-        self.deconv = nn.ConvTranspose2d(input_c, output_c, kernel,
-                                         padding=padding, stride=stride, output_padding=output_padding)
-        self.act = nn.LeakyReLU(0.2)
+        self.deconv = nn.ConvTranspose2d(input_c // 2, input_c // 2, (kernel, kernel),
+                                         padding=(padding, padding), stride=(stride, stride),
+                                         output_padding=(output_padding, output_padding))
+        self.conv = Conv(input_c, output_c)
 
     def forward(self, x, skip_x):
         x = self.deconv(x)
-        x = self.act(x)
-        x = torch.cat([skip_x, x], axis=1)
-
+        x = torch.cat((skip_x, x), axis=1)
+        x = self.conv(x)
         return x

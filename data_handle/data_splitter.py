@@ -1,15 +1,16 @@
 import os.path
 from typing import Dict, Tuple
+from pathlib import Path
 
 import numpy as np
 from sklearn.model_selection import train_test_split
 
 
 def load_raw_data() -> (np.ndarray, np.ndarray):
-    l_channel = np.load('dataset/raw/l/gray_scale.npy')
-    ab1 = np.load('dataset/raw/ab/ab1.npy')
-    ab2 = np.load('dataset/raw/ab/ab2.npy')
-    ab3 = np.load('dataset/raw/ab/ab3.npy')
+    l_channel = np.load('data/raw/l/gray_scale.npy')
+    ab1 = np.load('data/raw/ab/ab1.npy')
+    ab2 = np.load('data/raw/ab/ab2.npy')
+    ab3 = np.load('data/raw/ab/ab3.npy')
 
     ab = np.concatenate((ab1, ab2, ab3), axis=0)
 
@@ -23,9 +24,12 @@ def split_data(l_channel: np.ndarray, ab: np.ndarray) -> Dict[str, Tuple[np.ndar
 
 
 def save_data(data: Dict[str, Tuple[np.ndarray, np.ndarray]]):
+    path = Path('data')
     for k, (x, y) in data.items():
-        np.save(os.path.join('dataset', k, 'x.npy'), x)
-        np.save(os.path.join('dataset', k, 'y.npy'), y)
+        if not os.path.isdir(path.joinpath(k)):
+            os.makedirs(path.joinpath(k))
+        np.save(str(path.joinpath(k, 'x.npy')), x)
+        np.save(str(path.joinpath(k, 'y.npy')), y)
 
 
 def split_data_2_train_val_test():

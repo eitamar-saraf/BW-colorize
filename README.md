@@ -16,12 +16,12 @@ You can run the next command to split the dataset to train, val, test
 
 Pay attention! it's assume that the dataset is in 
 
-- PROJECT_ROOT/dataset/raw/l/*
+- PROJECT_ROOT/data/raw/l/*
 
-- PROJECT_ROOT/dataset/raw/ab/* 
+- PROJECT_ROOT/data/raw/ab/* 
 
 directory.
 
-The output will be in `PROJECT_ROOT/dataset/` directory.
+The output will be in `PROJECT_ROOT/data/` directory.
 
 

@@ -129,4 +129,12 @@ dmypy.json
 .pyre/
 
 # data
-dataset
+/data/
+
+# pycharm
+/.idea/.gitignore
+/.idea/BW-colorize.iml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/vcs.xml

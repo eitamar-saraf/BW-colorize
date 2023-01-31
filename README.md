@@ -14,7 +14,7 @@ They used opencv to convert the images to lab color space.
 
 Example of the different color spaces:
 
-<img src="images/rgb_sample.png" alt=“” width="128" height="128">
+<img src="images/rgb_sample.png" alt=“” width="128" height="128"> <img src="images/gray_sample.png" alt=“” width="128" height="128"> <img src="images/lab_sample.png" alt=“” width="128" height="128">
 
 ## How to use (WIP)
 ### Creation of data

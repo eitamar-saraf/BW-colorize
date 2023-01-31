@@ -11,6 +11,7 @@ class Generator(nn.Module):
         self.relu = nn.ReLU()
         self.leakyrelu = nn.LeakyReLU()
         self.activation = nn.Tanh()
+        self.dropout = nn.Dropout(0.5)
         self.conv2d_1 = nn.Conv2d(in_channels=1, out_channels=64, kernel_size=4, stride=2, padding=1, bias=False)
         self.batchnorm_1 = nn.BatchNorm2d(64)
         self.conv2d_2 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=4, stride=2, padding=1, bias=False)
@@ -56,9 +57,9 @@ class Generator(nn.Module):
         encoder_output_6 = self.leakyrelu(self.batchnorm_6(self.conv2d_6(encoder_output_5)))
         encoder_output = self.conv2d_7(encoder_output_6)
         # decoder
-        decoder_output = self.batchnorm_8(self.conv2d_8(self.relu(encoder_output)))
-        decoder_output = self.batchnorm_9(
-            self.conv2d_9(self.relu(torch.cat([encoder_output_6, decoder_output], 1))))  # skip connection
+        decoder_output = self.dropout(self.batchnorm_8(self.conv2d_8(self.relu(encoder_output))))
+        decoder_output = self.dropout(self.batchnorm_9(
+            self.conv2d_9(self.relu(torch.cat([encoder_output_6, decoder_output], 1)))))  # skip connection
         decoder_output = self.batchnorm_10(
             self.conv2d_10(self.relu(torch.cat([encoder_output_5, decoder_output], 1))))  # skip connection
         decoder_output = self.batchnorm_11(

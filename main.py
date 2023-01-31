@@ -1,14 +1,15 @@
 import argparse
+import torch
 
 import numpy as np
 import pytorch_lightning as pl
 
 import cv2
-import matplotlib.pyplot as plt
+from lightning_fabric import seed_everything
 
 from data_handle.data_module import BWDataModule
 from data_handle.data_splitter import split_data_2_train_val_test
-from models.unet import Unet
+from models.pix2pix.gan import GAN
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='This app is used for BW-Colorize task')
@@ -20,17 +21,19 @@ if __name__ == '__main__':
         split_data_2_train_val_test()
 
     elif args.action == 'train':
-        train_path = 'dataset/train'
-        val_path = 'dataset/val'
+        seed_everything(1235)
+        torch.set_float32_matmul_precision('medium')
+        train_path = 'data/train'
+        val_path = 'data/val'
         data = BWDataModule(train_dir=train_path, val_dir=val_path)
 
-        model = Unet(in_c=1, out_c=2)
-        trainer = pl.Trainer(gpus=1)
+        model = GAN()
+        trainer = pl.Trainer(accelerator='gpu', devices=1, max_epochs=100)
         trainer.fit(model, data)
 
     elif args.action == 'eval':
-        x = np.load('dataset/train/x.npy')
-        y = np.load('dataset/train/y.npy')
+        x = np.load('data/train/x.npy')
+        y = np.load('data/train/y.npy')
 
         img = x[0]
         img = np.expand_dims(img, 2)

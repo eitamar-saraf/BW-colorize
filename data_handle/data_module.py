@@ -7,7 +7,7 @@ from torchvision.transforms import transforms
 
 import numpy as np
 
-from data_handle.Scalar import TorchStandardScaler
+from Transform.Scalar import TorchStandardScaler
 from data_handle.dataset import BWDataset
 
 
@@ -21,10 +21,15 @@ class BWDataModule(pl.LightningDataModule):
         self.train_dataset = None
         self.val_dataset = None
         self.trans = None
+        self.mean = np.array([105.889, 131.027, 134.933])
+        self.std = np.array([71.90, 13.57, 19.448])
 
     def prepare_data(self):
+        self.trans = transforms.Compose(
+            [transforms.Normalize(self.mean, self.std),
+             TorchStandardScaler()])
 
-        self.trans = transforms.Compose([transforms.ToTensor(), TorchStandardScaler()])
+        # self.trans = transforms.Compose([transforms.ToTensor(), TorchStandardScaler()])
 
     def setup(self, stage: Optional[str] = None):
         self.train_dataset = BWDataset(x_dir=path.join(self.train_dir, 'x.npy'),

@@ -20,20 +20,16 @@ class BWDataset(Dataset):
 
         l_image = np.expand_dims(l_image, 2)
 
-        image = np.dstack((l_image, ab_image))
-        image = cv2.cvtColor(image, cv2.COLOR_LAB2RGB)
+        image = torch.from_numpy(np.dstack((l_image, ab_image))).type(torch.float32).permute(2, 0, 1)
 
         if self.augmentations:
-            image = torch.from_numpy(image.transpose((2, 0, 1))).float()
             image = self.augmentations(image)
-            image = image.numpy().transpose((1, 2, 0)).astype(np.uint8)
-            image = cv2.cvtColor(image, cv2.COLOR_RGB2LAB)
-            l_image = image[:, :, 0]
-            ab_image = image[:, :, 1:]
 
         if self.transforms:
-            l_image = self.transforms(l_image)
-            ab_image = self.transforms(ab_image)
+            image = self.transforms(image)
+
+        l_image = image[0, :, :].unsqueeze(0)
+        ab_image = image[1:, :, :]
 
         return l_image, ab_image
 

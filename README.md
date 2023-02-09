@@ -16,6 +16,16 @@ Example of the different color spaces:
 
 <img src="images/rgb_sample.png" alt=“” width="128" height="128"> <img src="images/gray_sample.png" alt=“” width="128" height="128"> <img src="images/lab_sample.png" alt=“” width="128" height="128">
 
+I prefer to use Lab color space because the L is similar to the grayscale image, and the a and b are the color channels.
+This way, we will learn to output only two channels instead of 3, which should be easier for the network to learn.
+
+
+## Model
+We used [pix2pix](https://arxiv.org/pdf/1611.07004.pdf) model, which is a conditional GAN model that learns to map from one image to another. In out case we want to map from a grayscale image to a colored image.
+
+## Results
+
+
 ## How to use (WIP)
 ### Creation of data
 You can run the next command to split the dataset to train, val, test

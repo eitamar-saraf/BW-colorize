@@ -100,17 +100,10 @@ class GAN(LightningModule):
             fake_images = sample['fake_image'][:8]
             real_images = sample['real_image'][:8]
 
-            # transpose to (C, H, W) for cv2
-            fake_image = fake_images.permute(0, 2, 3, 1)
-            real_image = real_images.permute(0, 2, 3, 1)
-            # transform to numpy
-            fake_image = fake_image.cpu().numpy()
-            real_image = real_image.cpu().numpy()
-
             images = []
-            for real, fake in zip(real_image, fake_image):
-                real = reverse_transform(real)
-                fake = reverse_transform(fake)
+            for real, fake in zip(real_images, fake_images):
+                real = reverse_transform(real.cpu())
+                fake = reverse_transform(fake.cpu())
 
                 # expand the dimension to (N, H, W, C) and concat on the row dimension
                 sample = np.stack((real, fake))
